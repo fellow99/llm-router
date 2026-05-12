@@ -1,0 +1,13 @@
+version: "3.8"
+
+services:
+  llm-router:
+    image: fellow99/llm-router
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    ports:
+      - "11411:11411"
+    volumes:
+      - ./config.json:/data/config.json
+    restart: unless-stopped
