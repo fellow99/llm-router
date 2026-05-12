@@ -1,10 +1,60 @@
-import type { BackendConfig, ChatCompletionRequest } from '../types';
+import type { BackendConfig, ChatCompletionRequest, AliasTarget, AliasValue } from '../types';
 
-export function applyAlias(body: ChatCompletionRequest, aliases: Record<string, string>): ChatCompletionRequest {
-  if (body.model && aliases[body.model]) {
-    body.model = aliases[body.model];
+// ─── Weighted Random Selection ──────────────────────────────────────────────
+
+function weightedSelect(targets: Record<string, AliasTarget>): {
+  selected: string;
+  fallbacks: string[];
+} {
+  const entries = Object.entries(targets);
+
+  const primary = entries.filter(([, t]) => !t.fallback);
+  const fallback = entries
+    .filter(([, t]) => t.fallback)
+    .sort((a, b) => b[1].weight - a[1].weight)
+    .map(([key]) => key);
+
+  if (primary.length === 0) {
+    // All targets are fallback: use first as primary, rest as fallbacks
+    return { selected: fallback[0] || '', fallbacks: fallback.slice(1) };
   }
-  return body;
+
+  // Weighted random from primary targets
+  const totalWeight = primary.reduce((sum, [, t]) => sum + t.weight, 0);
+  let random = Math.random() * totalWeight;
+
+  let selected = primary[0][0];
+  for (const [key, target] of primary) {
+    random -= target.weight;
+    if (random <= 0) {
+      selected = key;
+      break;
+    }
+  }
+
+  return { selected, fallbacks: fallback };
+}
+
+// ─── Alias Resolution ───────────────────────────────────────────────────────
+
+export function applyAlias(
+  body: ChatCompletionRequest,
+  aliases: Record<string, AliasValue>,
+): { fallbackTargets: string[] } {
+  if (!body.model || !aliases[body.model]) {
+    return { fallbackTargets: [] };
+  }
+
+  const aliasValue = aliases[body.model];
+
+  if (typeof aliasValue === 'string') {
+    body.model = aliasValue;
+    return { fallbackTargets: [] };
+  }
+
+  const { selected, fallbacks } = weightedSelect(aliasValue);
+  body.model = selected;
+  return { fallbackTargets: fallbacks };
 }
 
 export function matchBackend(

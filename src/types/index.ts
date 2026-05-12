@@ -14,12 +14,32 @@ export const BackendConfigSchema = z.object({
   unsupported_params: z.array(z.string()).default([]),
 });
 
+// ─── Alias Target Schema (weighted routing) ──────────────────────────────────
+
+export const AliasTargetSchema = z.object({
+  weight: z.number().positive("Weight must be positive"),
+  fallback: z.boolean().optional().default(false),
+});
+
+export type AliasTarget = z.infer<typeof AliasTargetSchema>;
+
+// ─── Alias Value ─────────────────────────────────────────────────────────────
+
+/** A single alias can be a plain string or a weighted multi-backend map */
+export type AliasValue = string | Record<string, AliasTarget>;
+
 // ─── Configuration Schema ────────────────────────────────────────────────────
 
 export const ConfigSchema = z.object({
   listening_port: z.number().int().positive().default(11411),
   llmrouter_api_key_env: z.string().default("LLMROUTER_API_KEY"),
-  aliases: z.record(z.string(), z.string()).default({}),
+  aliases: z.record(
+    z.string(),
+    z.union([
+      z.string(),
+      z.record(z.string(), AliasTargetSchema),
+    ]),
+  ).default({}),
   backends: z.array(BackendConfigSchema).min(1, "At least one backend is required"),
 });
 
