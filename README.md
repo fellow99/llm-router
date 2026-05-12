@@ -8,6 +8,7 @@
 
 - **多后端前缀路由** — 根据模型名前缀（`openai/`、`deepseek/` 等）自动路由到对应后端，支持配置一个默认后端处理无前缀请求
 - **模型别名** — `o1` → `groq/deepseek-r1-distill-qwen-32b`，简化模型名称
+- **路由权重** — 一个别名映射到多个后端，按权重随机选择 + 失败自动回退
 - **消息角色重写** — 按后端自动转换不兼容角色（如 `developer` → `system`）
 - **参数过滤** — 移除后端不支持的请求参数（如 `reasoning_effort`）
 - **客户端认证** — Bearer Token 认证保护服务端点
@@ -101,6 +102,7 @@
 |------|------|---------|
 | 多后端前缀路由 | ✅ | `src/handler/chatHandler.ts`, `src/proxy/index.ts` |
 | 模型别名映射 | ✅ | `src/middleware/preprocessor.ts` |
+| 路由权重与回退 | ✅ | `src/middleware/preprocessor.ts`, `src/handler/chatHandler.ts` |
 | 消息角色重写 | ✅ | `src/middleware/preprocessor.ts` |
 | 不支持参数过滤 | ✅ | `src/middleware/preprocessor.ts` |
 | Bearer Token 认证 | ✅ | `src/middleware/auth.ts` |
@@ -138,9 +140,17 @@
   "listening_port": 11411,         // 服务端口 (默认 11411)
   "llmrouter_api_key_env": "LLMROUTER_API_KEY",
                                     // API 密钥环境变量名
-  "aliases": {                      // 模型别名映射
+  "aliases": {                      // 模型别名映射（支持字符串和加权两种格式）
+    // 字符串格式（向后兼容）
     "deepseek-v4-pro": "deepseek/deepseek-v4-pro",
-    "o1": "openai/o1-mini"
+    "o1": "openai/o1-mini",
+
+    // 加权格式：多个后端按权重随机选择，带失败回退
+    "glm5.1": {
+      "aliyun/glm5.1": { "weight": 0.2 },
+      "baidu/glm5.1": { "weight": 0.4 },
+      "deepseek/glm5.1": { "weight": 0.3, "fallback": true }
+    }
   },
   "backends": [                     // 后端列表 (至少 1 个)
     {
@@ -161,6 +171,17 @@
   ]
 }
 ```
+
+### 路由权重配置
+
+别名支持 **加权多后端路由**，实现自动负载分散和失败回退：
+
+- `weight` — 路由权重（正数），决定该后端被选中的概率。系统自动归一化，无需总和为 1.0
+- `fallback` — 回退标记（可选，默认 `false`）。标记为 `true` 的后端不参与正常加权选择，仅当主后端请求失败时按权重降序依次尝试
+
+**示例：** 请求 `"glm5.1"` 时，aliyun 有 20% 概率被选中，baidu 有 40% 概率（其余 40% 因 deepseek 标记了 fallback 不参与）。若主后端返回错误，自动回退到 deepseek 重试。
+
+字符串格式的别名（如 `"o1": "openai/o1-mini"`）行为不变。
 
 ### 认证优先级
 
