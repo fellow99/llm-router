@@ -1,7 +1,7 @@
 {
-  "name": "opencode-stack",
-  "version": "0.1.0",
-  "description": "opencode 服务器的聚合服务程序，南向聚合连接多个 opencode 服务器，北向提供统一兼容接口",
+  "name": "llm-router",
+  "version": "0.2.0",
+  "description": "大模型聚合路由服务 —— 南向聚合连接多个大模型 API，北向提供兼容 OpenAI 接口的统一服务端点。",
   "main": "dist/app.js",
   "scripts": {
     "dev": "nodemon --config nodemon.json src/app.ts",
