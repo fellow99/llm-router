@@ -103,6 +103,8 @@ export function chatCompletionsHandler(
       });
     }
 
+    req.url = '/chat/completions';
+
     config.logger.info('Chat completion request', {
       model: body.model,
       stream: body.stream || false,

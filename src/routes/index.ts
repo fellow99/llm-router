@@ -21,6 +21,7 @@ export function createRouter(config: RuntimeConfig, proxies: ProxyInstances): Ro
   });
 
   router.post('/chat/completions', chatCompletionsHandler(config, proxies));
+  router.post('/v1/chat/completions', chatCompletionsHandler(config, proxies));
 
   router.all('*', (req, res, next) => {
     if (proxies.defaultProxy) {
