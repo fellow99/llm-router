@@ -71,6 +71,13 @@ export function initializeProxies(config: RuntimeConfig): ProxyInstances {
   let defaultProxy: RequestHandler | null = null;
 
   for (const backend of config.backends) {
+    if (backend.disabled) {
+      config.logger.info('Backend disabled, skipping proxy creation', {
+        backend: backend.name,
+      });
+      continue;
+    }
+
     const apiKey = resolveBackendApiKey(backend);
     const proxy = createBackendProxy(backend, apiKey, config.logger);
 

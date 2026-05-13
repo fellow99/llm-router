@@ -6,10 +6,14 @@ function weightedSelect(targets: Record<string, AliasTarget>): {
   selected: string;
   fallbacks: string[];
 } {
-  const entries = Object.entries(targets);
+  const active = Object.entries(targets).filter(([, t]) => !t.disabled);
 
-  const primary = entries.filter(([, t]) => !t.fallback);
-  const fallback = entries
+  if (active.length === 0) {
+    return { selected: '', fallbacks: [] };
+  }
+
+  const primary = active.filter(([, t]) => !t.fallback);
+  const fallback = active
     .filter(([, t]) => t.fallback)
     .sort((a, b) => b[1].weight - a[1].weight)
     .map(([key]) => key);
@@ -62,6 +66,7 @@ export function matchBackend(
   backends: BackendConfig[],
 ): { backend: BackendConfig; modelWithoutPrefix: string } | null {
   for (const backend of backends) {
+    if (backend.disabled) continue;
     if (model.startsWith(backend.prefix)) {
       return {
         backend,

@@ -8,6 +8,7 @@ export const BackendConfigSchema = z.object({
   base_url: z.string().url("Invalid backend URL format"),
   prefix: z.string().min(1, "Backend prefix is required"),
   default: z.boolean().default(false),
+  disabled: z.boolean().optional().default(false),
   require_api_key: z.boolean().default(false),
   api_key: z.string().default(""),
   role_rewrites: z.record(z.string(), z.string()).default({}),
@@ -19,6 +20,7 @@ export const BackendConfigSchema = z.object({
 export const AliasTargetSchema = z.object({
   weight: z.number().positive("Weight must be positive"),
   fallback: z.boolean().optional().default(false),
+  disabled: z.boolean().optional().default(false),
 });
 
 export type AliasTarget = z.infer<typeof AliasTargetSchema>;

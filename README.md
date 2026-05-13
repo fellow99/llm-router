@@ -149,6 +149,7 @@
     "glm5.1": {
       "aliyun/glm5.1": { "weight": 0.2 },
       "baidu/glm5.1": { "weight": 0.4 },
+      "disabled-backend/model": { "weight": 0.3, "disabled": true },
       "deepseek/glm5.1": { "weight": 0.3, "fallback": true }
     }
   },
@@ -159,6 +160,7 @@
                                     // 后端 API 地址
       "prefix": "deepseek/",        // 模型前缀，用于路由
       "default": true,              // 默认后端 (仅一个为 true)
+      "disabled": false,           // 是否禁用此后端 (true 则忽略，默认 false)
       "require_api_key": true,      // 是否需要注入 API Key
       "api_key": "${env:DEEPSEEK_API_KEY}",  // API Key (直接值或 ${env:} 引用)
       "role_rewrites": {            // 角色重写映射
@@ -178,6 +180,8 @@
 
 - `weight` — 路由权重（正数），决定该后端被选中的概率。系统自动归一化，无需总和为 1.0
 - `fallback` — 回退标记（可选，默认 `false`）。标记为 `true` 的后端不参与正常加权选择，仅当主后端请求失败时按权重降序依次尝试
+- `disabled` — 禁用标记（可选，默认 `false`）。标记为 `true` 的目标完全被排除出路由（等价于 `weight=0`），不参与加权选择也不参与回退。适用于临时关闭某个后端或模型而不删除配置
+- `disabled` — 禁用标记（可选，默认 `false`）。标记为 `true` 的目标不参与加权选择，也不会被纳入回退列表
 
 **示例：** 请求 `"glm5.1"` 时，aliyun 有 20% 概率被选中，baidu 有 40% 概率（其余 40% 因 deepseek 标记了 fallback 不参与）。若主后端返回错误，自动回退到 deepseek 重试。
 
