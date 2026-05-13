@@ -19,7 +19,7 @@
 |------|------|---------|
 | Bearer Token 认证 | 请求头 `Authorization: Bearer <LLMROUTER_API_KEY>` | `src/middleware/auth.ts` |
 | API 密钥来源 | 命令行参数 > 环境变量 > .env 文件 > 自动生成 | `src/config/index.ts` |
-| 后端认证 | 各后端独立 API Key，通过 `key_env_var` 配置 | `src/proxy/director.ts` |
+| 后端认证 | 各后端独立 API Key，通过 `api_key` 配置 | `src/proxy/director.ts` |
 
 ### CORS 配置
 
@@ -47,18 +47,20 @@
 
 | 参数 | 默认值 | 说明 |
 |------|--------|------|
-| `--config` | `config.json` | 配置文件路径（支持 JSON/YAML） |
-| `--llmrouter-api-key-env` | `LLMROUTER_API_KEY` | API 密钥环境变量名 |
-| `--llmrouter-api-key` | (空) | 直接指定 API 密钥 |
-| `--port` | `0` (使用配置文件值) | 监听端口 |
+| `-c, --config` | `config.json` | 配置文件路径（支持 JSON/YAML） |
+| `-h, --host` | (使用配置文件值) | 监听地址（覆盖配置文件） |
+| `-p, --port` | (使用配置文件值) | 监听端口（覆盖配置文件） |
+| `-k, --api-key` | (空) | 直接指定 API 密钥 |
 | `--log-level` | `warn` | 日志级别 |
 
 ### 配置文件 API (`config.json` / `config.yaml`)
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| `listening_port` | number | 服务监听端口（默认 11411） |
-| `llmrouter_api_key_env` | string | LLM-Router API 密钥的环境变量名 |
+| `server` | object | 服务端配置节点 |
+| `server.host` | string | 监听地址 (空→127.0.0.1, `"true"`→0.0.0.0, 或 `${env:VAR}`) |
+| `server.port` | string | 监听端口 (空→11411, 或 `${env:VAR}` 解析为数字) |
+| `server.api_key` | string | API 密钥值或 `${env:VAR}` 环境变量引用 |
 | `aliases` | Record\<string, string\> | 模型别名映射 |
 | `backends` | BackendConfig[] | 后端配置数组 |
 | `backends[].name` | string | 后端名称 |

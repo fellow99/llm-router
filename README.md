@@ -137,9 +137,11 @@
 
 ```jsonc
 {
-  "listening_port": 11411,         // 服务端口 (默认 11411)
-  "llmrouter_api_key": "",
-                                    // API 密钥值或 "${env:VAR_NAME}" 环境变量引用
+  "server": {                       // 服务端配置
+    "host": "",                     // 监听地址 (空→127.0.0.1, "true"→0.0.0.0)
+    "port": "",                     // 监听端口 (空→11411, 或 "${env:PORT}")
+    "api_key": ""                   // 北向 API 密钥 (直接值或 "${env:VAR_NAME}")
+  },
   "aliases": {                      // 模型别名映射（支持字符串和加权两种格式）
     // 字符串格式（向后兼容）
     "deepseek-v4-pro": "deepseek/deepseek-v4-pro",
@@ -189,7 +191,7 @@
 ### 认证优先级
 
 ```
-命令行 --llmrouter-api-key > 配置文件 llmrouter_api_key 字段 > 自动生成 rsk_***
+命令行 --api-key > 配置文件 server.api_key 字段 > 自动生成 rsk_***
 ```
 
 ## 快速开始
@@ -210,7 +212,11 @@ cp config.example.json config.json
 
 ```jsonc
 {
-  "listening_port": 11411,
+  "server": {
+    "host": "",
+    "port": "11411",
+    "api_key": ""
+  },
   "backends": [
     {
       "name": "openai",
@@ -233,7 +239,7 @@ export OPENAI_API_KEY="sk-..."
 export DEEPSEEK_API_KEY="sk-..."
 
 # 或通过命令行
-npx ts-node src/app.ts --llmrouter-api-key="sk-your-key-here"
+npx ts-node src/app.ts --api-key="sk-your-key-here"
 ```
 
 > 如不设置 `LLMROUTER_API_KEY`，服务启动时会自动生成密码学安全的随机密钥并打印到控制台。
@@ -286,9 +292,10 @@ curl -X POST http://localhost:11411/chat/completions \
 
 | 参数 | 默认值 | 说明 |
 |------|--------|------|
-| `--config <path>` | `config.json` | 配置文件路径 (支持 .json/.yaml/.yml) |
-| `--port <number>` | 配置文件值 | 监听端口 |
-| `--llmrouter-api-key <key>` | (无) | 直接指定 API 密钥 |
+| `-c, --config <path>` | `config.json` | 配置文件路径 (支持 .json/.yaml/.yml) |
+| `-h, --host <ip>` | 配置文件值 | 监听地址 (覆盖配置文件) |
+| `-p, --port <port>` | 配置文件值 | 监听端口 (覆盖配置文件) |
+| `-k, --api-key <key>` | (无) | 直接指定 API 密钥 |
 | `--log-level <level>` | `warn` | 日志级别 (debug/info/warn/error) |
 
 ## 项目结构

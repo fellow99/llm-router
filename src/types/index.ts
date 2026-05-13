@@ -30,11 +30,18 @@ export type AliasTarget = z.infer<typeof AliasTargetSchema>;
 /** A single alias can be a plain string or a weighted multi-backend map */
 export type AliasValue = string | Record<string, AliasTarget>;
 
+// ─── Server Configuration Schema ──────────────────────────────────────────────
+
+export const ServerConfigSchema = z.object({
+  host: z.string().default(''),
+  port: z.string().default(''),
+  api_key: z.string().default(''),
+});
+
 // ─── Configuration Schema ────────────────────────────────────────────────────
 
 export const ConfigSchema = z.object({
-  listening_port: z.number().int().positive().default(11411),
-  llmrouter_api_key: z.string().default(""),
+  server: ServerConfigSchema,
   aliases: z.record(
     z.string(),
     z.union([
@@ -48,13 +55,16 @@ export const ConfigSchema = z.object({
 // ─── Inferred Types ──────────────────────────────────────────────────────────
 
 export type BackendConfig = z.infer<typeof BackendConfigSchema>;
+export type ServerConfig = z.infer<typeof ServerConfigSchema>;
 export type Config = z.infer<typeof ConfigSchema>;
 
 // ─── Runtime Configuration ───────────────────────────────────────────────────
 
 export interface RuntimeConfig extends Config {
-  llmrouterApiKey: string;    // Resolved API key from env or auto-generated
-  useGeneratedKey: boolean;   // Whether key was auto-generated
+  serverHost: string;          // Resolved server listen host
+  serverPort: number;          // Resolved server listen port
+  llmrouterApiKey: string;     // Resolved API key from env or auto-generated
+  useGeneratedKey: boolean;    // Whether key was auto-generated
   logger: Logger;              // Winston logger instance (import from winston)
 }
 

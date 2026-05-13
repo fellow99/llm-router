@@ -162,8 +162,11 @@ Authorization: Bearer <LLMROUTER_API_KEY>
 
 ```json
 {
-  "listening_port": 11411,
-  "llmrouter_api_key": "",
+  "server": {
+    "host": "",
+    "port": "",
+    "api_key": ""
+  },
   "aliases": {
     "o1": "groq/deepseek-r1-distill-qwen-32b",
     "deepseek-v4-pro": "deepseek/deepseek-v4-pro"
@@ -200,7 +203,7 @@ Authorization: Bearer <LLMROUTER_API_KEY>
 | `backends[].base_url` | 合法 URL |
 | `backends[].prefix` | 非空字符串 |
 | `backends` | 至少一个后端 |
-| `listening_port` | 正整数 |
+| `server.port` | 解析为正整数，空字符串默认为 11411 |
 | 默认后端 | 最多一个 `default: true` (软验证) |
 
 ---

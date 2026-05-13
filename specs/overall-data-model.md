@@ -41,45 +41,74 @@ const BackendConfigSchema = z.object({
 type BackendConfig = z.infer<typeof BackendConfigSchema>;
 ```
 
-### Config
+### ServerConfig
 
-全局配置，包含服务端口、后端列表、认证信息和模型别名。
+服务端配置，封装服务监听地址、端口和北向 API 密钥。
 
 | 字段 | TypeScript 类型 | Zod 类型 | JSON 键 | 必填 | 默认值 | 说明 |
 |------|----------------|---------|---------|------|--------|------|
-| `listeningPort` | `number` | `z.number().int().positive()` | `listening_port` | 否 | `11411` | HTTP 服务监听端口 |
+| `host` | `string` | `z.string()` | `host` | 否 | `""` | 监听地址（`""`→127.0.0.1, `"true"`→0.0.0.0, 或 `${env:VAR}`） |
+| `port` | `string` | `z.string()` | `port` | 否 | `""` | 监听端口（`""`→11411, 或 `${env:VAR}`） |
+| `apiKey` | `string` | `z.string()` | `api_key` | 否 | `""` | API 密钥值或 `${env:VAR_NAME}` 环境变量引用 |
+
+**Zod Schema**:
+
+```typescript
+const ServerConfigSchema = z.object({
+  host: z.string().default(''),
+  port: z.string().default(''),
+  api_key: z.string().default(''),
+});
+```
+
+### Config
+
+全局配置，包含服务端配置、后端列表和模型别名。
+
+| 字段 | TypeScript 类型 | Zod 类型 | JSON 键 | 必填 | 默认值 | 说明 |
+|------|----------------|---------|---------|------|--------|------|
+| `server` | `ServerConfig` | `ServerConfigSchema` | `server` | 是 | - | 服务端配置 |
 | `backends` | `BackendConfig[]` | `z.array(BackendConfigSchema)` | `backends` | 是 | - | 后端配置列表 |
-| `llmrouterApiKey` | `string` | `z.string()` | `llmrouter_api_key` | 否 | `""` | API 密钥值或 `${env:VAR_NAME}` 环境变量引用 |
+| `aliases` | `Record<string, ...>` | `z.record(...)` | `aliases` | 否 | `{}` | 模型别名映射（支持字符串和加权格式） |
 | `llmrouterApiKey` | `string` | - | (运行时) | 否 | `""` | LLM-Router API 密钥值（运行时确定） |
 | `useGeneratedKey` | `boolean` | - | (运行时) | 否 | `false` | 是否使用自动生成的密钥 |
-| `aliases` | `Record<string, string>` | `z.record(z.string(), z.string())` | `aliases` | 否 | `{}` | 模型别名映射 |
+| `serverHost` | `string` | - | (运行时) | 否 | - | 解析后的监听地址（运行时确定） |
+| `serverPort` | `number` | - | (运行时) | 否 | - | 解析后的监听端口（运行时确定） |
 | `logger` | `Logger` | - | (运行时) | 否 | - | Winston 日志器实例 |
 
 **Zod Schema**:
 
 ```typescript
 const ConfigSchema = z.object({
-  listening_port: z.number().int().positive().default(11411),
+  server: ServerConfigSchema,
   backends: z.array(BackendConfigSchema).min(1),
-  llmrouter_api_key: z.string().default(""),
-  aliases: z.record(z.string(), z.string()).default({}),
+  aliases: z.record(...).default({}),
 });
 ```
 
-**TypeScript 类型** (从 Zod Schema 推断):
+**TypeScript 类型** (运行时):
 
 ```typescript
-type Config = z.infer<typeof ConfigSchema> & {
-  llmrouterApiKey?: string;  // 运行时确定
-  useGeneratedKey?: boolean; // 运行时确定
-  logger?: Logger;            // 运行时注入
-};
+type Config = z.infer<typeof ConfigSchema>;
+
+interface RuntimeConfig extends Config {
+  serverHost: string;         // resolved listen host
+  serverPort: number;         // resolved listen port
+  llmrouterApiKey: string;    // resolved API key
+  useGeneratedKey: boolean;
+  logger: Logger;
+}
 ```
 
 ## 实体关系
 
 ```
 Config
+  ├── 1:1 → ServerConfig (服务端配置)
+  │         ├── host (监听地址)
+  │         ├── port (监听端口)
+  │         └── apiKey (北向 API 密钥)
+  │
   ├── 1:N → BackendConfig (后端配置列表)
   │         ├── name (标识)
   │         ├── prefix (路由键)
@@ -122,10 +151,10 @@ RequestContext (附加到 Express Request 对象):
 
 | Go 字段 | TypeScript 字段 | 说明 |
 |---------|----------------|------|
-| `ListeningPort` | `listeningPort` | 驼峰命名 → 配置文件使用 snake_case |
+| `ListeningPort` | `server.port` | 已移至 `server` 节点内 |
+| `LLMRouterAPIKey` | `server.api_key` | 已移至 `server` 节点内，运行时确定 |
+| `LLMRouterAPIKeyEnv` | `server.api_key` (`${env:}`) | 通过 `${env:}` 占位符替代独立字段 |
 | `Backends` | `backends` | 数组类型，结构相同 |
-| `LLMRouterAPIKeyEnv` | `llmrouterApiKey` | 运行时确定，支持直接值或 `${env:}` 语法 |
-| `LLMRouterAPIKey` | `llmrouterApiKey` | 运行时属性，不在 JSON 中 |
 | `UseGeneratedKey` | `useGeneratedKey` | 运行时属性，不在 JSON 中 |
 | `Aliases` | `aliases` | Record 类型，结构相同 |
 | `Logger *zap.Logger` | `logger Logger` | Winston 替代 Zap |

@@ -12,9 +12,10 @@ async function main() {
   app.use(express.urlencoded({ extended: true }));
   app.use('/', createRouter(config, proxies));
 
-  app.listen(config.listening_port, () => {
-    config.logger.info(`LLM-Router listening on :${config.listening_port}`, {
-      port: config.listening_port,
+  app.listen(config.serverPort, config.serverHost, () => {
+    config.logger.info(`LLM-Router listening on ${config.serverHost}:${config.serverPort}`, {
+      host: config.serverHost,
+      port: config.serverPort,
       backends: config.backends.map(b => b.name),
     });
   });

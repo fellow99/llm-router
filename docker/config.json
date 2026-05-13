@@ -1,1 +1,9 @@
-{}
+{
+	"server": {
+		"host": "",
+		"port": "11411",
+		"api_key": "${env:LLMROUTER_API_KEY}"
+	},
+	"aliases": {},
+	"backends": []
+}
