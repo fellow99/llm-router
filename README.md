@@ -18,6 +18,7 @@
 - **SSE 流式响应** — 原生支持 `text/event-stream` 流式转发
 - **结构化日志** — Winston JSON 日志，API Key 自动脱敏
 - **多格式配置** — 支持 JSON（含 JSONC 注释）和 YAML 配置文件
+- **双路径兼容** — 同时支持 `POST /v1/chat/completions` 和 `POST /chat/completions`，兼容 OpenAI SDK 和直接 API 调用
 
 ## 架构概览
 
@@ -59,7 +60,7 @@
 ## 路由流程
 
 ```
-请求 POST /chat/completions
+请求 POST /v1/chat/completions (或 /chat/completions)
       │
       ▼
   ┌─────────┐  无/无效   ┌──────────┐
