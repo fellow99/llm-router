@@ -16,7 +16,7 @@
 | `prefix` | `string` | `z.string()` | `prefix` | 是 | - | 模型前缀，如 `"openai/"`，用于路由匹配 |
 | `default` | `boolean` | `z.boolean()` | `default` | 否 | `false` | 是否为默认后端（仅一个可为 true） |
 | `requireApiKey` | `boolean` | `z.boolean()` | `require_api_key` | 否 | `false` | 后端是否需要 API 密钥认证 |
-| `keyEnvVar` | `string` | `z.string()` | `key_env_var` | 否 | `""` | API 密钥对应的环境变量名 |
+| `apiKey` | `string` | `z.string()` | `api_key` | 否 | `""` | API 密钥值或 `${env:VAR_NAME}` 环境变量引用 |
 | `roleRewrites` | `Record<string, string>` | `z.record(z.string(), z.string())` | `role_rewrites` | 否 | `{}` | 消息角色重写映射，如 `{"developer": "system"}` |
 | `unsupportedParams` | `string[]` | `z.array(z.string())` | `unsupported_params` | 否 | `[]` | 需要移除的不支持参数名列表 |
 
@@ -29,7 +29,7 @@ const BackendConfigSchema = z.object({
   prefix: z.string().min(1),
   default: z.boolean().default(false),
   require_api_key: z.boolean().default(false),
-  key_env_var: z.string().default(""),
+  api_key: z.string().default(""),
   role_rewrites: z.record(z.string(), z.string()).default({}),
   unsupported_params: z.array(z.string()).default([]),
 });
@@ -49,7 +49,7 @@ type BackendConfig = z.infer<typeof BackendConfigSchema>;
 |------|----------------|---------|---------|------|--------|------|
 | `listeningPort` | `number` | `z.number().int().positive()` | `listening_port` | 否 | `11411` | HTTP 服务监听端口 |
 | `backends` | `BackendConfig[]` | `z.array(BackendConfigSchema)` | `backends` | 是 | - | 后端配置列表 |
-| `llmrouterApiKeyEnv` | `string` | `z.string()` | `llmrouter_api_key_env` | 否 | `"LLMROUTER_API_KEY"` | API 密钥的环境变量名 |
+| `llmrouterApiKey` | `string` | `z.string()` | `llmrouter_api_key` | 否 | `""` | API 密钥值或 `${env:VAR_NAME}` 环境变量引用 |
 | `llmrouterApiKey` | `string` | - | (运行时) | 否 | `""` | LLM-Router API 密钥值（运行时确定） |
 | `useGeneratedKey` | `boolean` | - | (运行时) | 否 | `false` | 是否使用自动生成的密钥 |
 | `aliases` | `Record<string, string>` | `z.record(z.string(), z.string())` | `aliases` | 否 | `{}` | 模型别名映射 |
@@ -61,7 +61,7 @@ type BackendConfig = z.infer<typeof BackendConfigSchema>;
 const ConfigSchema = z.object({
   listening_port: z.number().int().positive().default(11411),
   backends: z.array(BackendConfigSchema).min(1),
-  llmrouter_api_key_env: z.string().default("LLMROUTER_API_KEY"),
+  llmrouter_api_key: z.string().default(""),
   aliases: z.record(z.string(), z.string()).default({}),
 });
 ```
@@ -124,7 +124,7 @@ RequestContext (附加到 Express Request 对象):
 |---------|----------------|------|
 | `ListeningPort` | `listeningPort` | 驼峰命名 → 配置文件使用 snake_case |
 | `Backends` | `backends` | 数组类型，结构相同 |
-| `LLMRouterAPIKeyEnv` | `llmrouterApiKeyEnv` | TypeScript 使用 camelCase |
+| `LLMRouterAPIKeyEnv` | `llmrouterApiKey` | 运行时确定，支持直接值或 `${env:}` 语法 |
 | `LLMRouterAPIKey` | `llmrouterApiKey` | 运行时属性，不在 JSON 中 |
 | `UseGeneratedKey` | `useGeneratedKey` | 运行时属性，不在 JSON 中 |
 | `Aliases` | `aliases` | Record 类型，结构相同 |
@@ -134,6 +134,6 @@ RequestContext (附加到 Express Request 对象):
 | `Prefix` | `prefix` | 路由前缀 |
 | `Default` | `default` | 布尔值 |
 | `RequireAPIKey` | `requireApiKey` | Go 大写 → TS camelCase |
-| `KeyEnvVar` | `keyEnvVar` | 环境变量名 |
+| `KeyEnvVar` | `apiKey` | API 密钥值或 `${env:}` 变量引用 |
 | `RoleRewrite` | `roleRewrites` | Go map → TS Record |
 | `UnsupportedParams` | `unsupportedParams` | Go 切片 → TS 数组 |

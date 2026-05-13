@@ -76,7 +76,7 @@ export const BackendConfigSchema = z.object({
   prefix: z.string().min(1, "Backend prefix is required"),
   default: z.boolean().default(false),
   require_api_key: z.boolean().default(false),
-  key_env_var: z.string().default(""),
+  api_key: z.string().default(""),
   role_rewrites: z.record(z.string(), z.string()).default({}),
   unsupported_params: z.array(z.string()).default([]),
 });
@@ -87,7 +87,7 @@ export const BackendConfigSchema = z.object({
 ```typescript
 export const ConfigSchema = z.object({
   listening_port: z.number().int().positive().default(11411),
-  llmrouter_api_key_env: z.string().default("LLMROUTER_API_KEY"),
+  llmrouter_api_key: z.string().default(""),
   aliases: z.record(z.string(), z.string()).default({}),
   backends: z.array(BackendConfigSchema).min(1, "At least one backend is required"),
 });
@@ -124,5 +124,5 @@ export { formatZodError };
 | 方向 | 说明 | 优先级 |
 |------|------|--------|
 | 自定义校验器 | 端口范围、URL 可达性验证 | P3 |
-| 条件依赖 | `require_api_key=true` 时 `key_env_var` 必填 | P2 |
+| 条件依赖 | `require_api_key=true` 时 `api_key` 建议配置 | P2 |
 | Schema 版本化 | 支持配置文件版本迁移 | P3 |

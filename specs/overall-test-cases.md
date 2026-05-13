@@ -73,7 +73,7 @@
 
 ### TC-PRX-003: 后端认证注入
 
-- **前置条件**: 后端配置了 `require_api_key: true` 和 `key_env_var: "OPENAI_API_KEY"`
+- **前置条件**: 后端配置了 `require_api_key: true` 和 `api_key: "${env:OPENAI_API_KEY}"`
 - **步骤**: 发送请求到该后端
 - **预期结果**: 请求头包含 `Authorization: Bearer <OPENAI_API_KEY>`
 - **优先级**: P1

@@ -41,14 +41,14 @@ export const BackendConfigSchema = z.object({
   prefix: z.string().min(1, 'Backend prefix is required'),
   default: z.boolean().default(false),
   require_api_key: z.boolean().default(false),
-  key_env_var: z.string().default(''),
+  api_key: z.string().default(''),
   role_rewrites: z.record(z.string(), z.string()).default({}),
   unsupported_params: z.array(z.string()).default([]),
 });
 
 export const ConfigSchema = z.object({
   listening_port: z.number().int().positive().default(11411),
-  llmrouter_api_key_env: z.string().default('LLMROUTER_API_KEY'),
+  llmrouter_api_key: z.string().default(''),
   aliases: z.record(z.string(), z.string()).default({}),
   backends: z.array(BackendConfigSchema).min(1, 'At least one backend is required'),
 });
@@ -78,10 +78,16 @@ interface RuntimeConfig extends Config {
 ## 3. API 密钥回退策略
 
 ```typescript
+function resolveEnvValue(val: string): string | undefined {
+  const match = val.match(/^\$\{env:(.+)\}$/);
+  if (match) return process.env[match[1]];
+  return val || undefined;
+}
+
 function resolveApiKey(config: Config, cliKey?: string): { key: string; generated: boolean } {
   if (cliKey) return { key: cliKey, generated: false };
-  const envKey = process.env[config.llmrouter_api_key_env];
-  if (envKey) return { key: envKey, generated: false };
+  const resolved = resolveEnvValue(config.llmrouter_api_key);
+  if (resolved) return { key: resolved, generated: false };
   const generated = generateStrongAPIKey(); // rsk_ + 48 chars
   logger.info(`Generated API key: ${generated}`);
   return { key: generated, generated: true };

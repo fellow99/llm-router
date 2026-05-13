@@ -32,7 +32,7 @@
 - [ ] T002-05: 实现认证注入决策树
   - 输入: 002-proxy-module/plan.md §4 认证决策树
   - 输出: 在 createDirector 内实现完整认证逻辑：
-    - require_api_key=true → 从 process.env[key_env_var] 获取密钥
+    - require_api_key=true → 从 api_key 字段解析（支持直接值或 `${env:VAR_NAME}` 语法）
     - OpenAI 回退 → process.env.OPENAI_API_KEY
     - require_api_key=false → 移除 Authorization 头
   - 验收: 各种后端配置组合下认证头正确注入或移除

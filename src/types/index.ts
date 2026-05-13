@@ -9,7 +9,7 @@ export const BackendConfigSchema = z.object({
   prefix: z.string().min(1, "Backend prefix is required"),
   default: z.boolean().default(false),
   require_api_key: z.boolean().default(false),
-  key_env_var: z.string().default(""),
+  api_key: z.string().default(""),
   role_rewrites: z.record(z.string(), z.string()).default({}),
   unsupported_params: z.array(z.string()).default([]),
 });
@@ -32,7 +32,7 @@ export type AliasValue = string | Record<string, AliasTarget>;
 
 export const ConfigSchema = z.object({
   listening_port: z.number().int().positive().default(11411),
-  llmrouter_api_key_env: z.string().default("LLMROUTER_API_KEY"),
+  llmrouter_api_key: z.string().default(""),
   aliases: z.record(
     z.string(),
     z.union([

@@ -20,13 +20,13 @@
 - 修改请求目标：Host、Scheme、URL Path 改写为后端地址
 - 拼接路径：后端 `base_url` + 原始路径
 - 设置代理头：`X-Real-IP`、`X-Forwarded-For`、`X-Forwarded-Proto`
-- 处理后端认证：根据 `require_api_key` 和 `key_env_var` 注入或移除 Authorization 头
+- 处理后端认证：根据 `require_api_key` 和 `api_key` 注入或移除 Authorization 头
 
 ### FR-PRX-003: 后端认证头注入
 
 - 当后端 `require_api_key` 为 `true` 时，注入 `Authorization: Bearer <key>`
-- API 密钥来源：环境变量 (`process.env[key_env_var]`)
-- 特殊回退：OpenAI 后端回退使用 `OPENAI_API_KEY`
+- API 密钥来源：`api_key` 字段支持直接值或 `${env:VAR_NAME}` 语法
+- 特殊回退：OpenAI 后端在 `api_key` 为空时回退使用 `OPENAI_API_KEY`
 - 当后端 `require_api_key` 为 `false` 时，移除请求中的 Authorization 头
 
 ### FR-PRX-004: 代理错误处理

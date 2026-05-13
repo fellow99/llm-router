@@ -8,12 +8,12 @@
 - [ ] T004-01: 创建 `src/types/index.ts`，定义 BackendConfigSchema
   - 输入: 004-model-module/spec.md FR-MDL-002
   - 输出: `src/types/index.ts` 包含 BackendConfigSchema Zod 定义
-  - 验收: Schema 包含 name(min1), base_url(url), prefix(min1), default(bool→false), require_api_key(bool→false), key_env_var(string→""), role_rewrites(record→{}), unsupported_params(array→[])
+  - 验收: Schema 包含 name(min1), base_url(url), prefix(min1), default(bool→false), require_api_key(bool→false), api_key(string→""), role_rewrites(record→{}), unsupported_params(array→[])
   - 文件: `src/types/index.ts`
 
 - [ ] T004-02: 在同一文件定义 ConfigSchema
   - 输入: 004-model-module/spec.md FR-MDL-001
-  - 输出: ConfigSchema 引用 BackendConfigSchema，包含 listening_port(int+→11411), llmrouter_api_key_env(string→"LLMROUTER_API_KEY"), aliases(record→{}), backends(array.min1)
+  - 输出: ConfigSchema 引用 BackendConfigSchema，包含 listening_port(int+→11411), llmrouter_api_key(string→""), aliases(record→{}), backends(array.min1)
   - 验收: `z.infer<typeof ConfigSchema>` 产生正确的 TypeScript 类型
   - 文件: `src/types/index.ts`
 

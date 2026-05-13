@@ -55,8 +55,8 @@
 ### FR-06: 后端认证代理
 
 - 系统必须为代表需要 API 密钥的后端自动注入认证头
-- API 密钥通过环境变量注入（由 `key_env_var` 配置指定）
-- OpenAI 后端在 `key_env_var` 为空时回退使用 `OPENAI_API_KEY`
+- API 密钥通过 `api_key` 字段注入（支持直接值或 `${env:VAR_NAME}` 语法）
+- OpenAI 后端在 `api_key` 为空时回退使用 `OPENAI_API_KEY`
 - 不需要认证的后端必须移除请求中的 Authorization 头
 
 **实现**: `src/proxy/director.ts`

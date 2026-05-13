@@ -26,7 +26,6 @@
 - 支持 `--config <path>` 配置文件路径
 - 支持 `--port <number>` 监听端口
 - 支持 `--llmrouter-api-key <key>` 直接指定 API 密钥
-- 支持 `--llmrouter-api-key-env <name>` API 密钥环境变量名
 - 支持 `--log-level <level>` 日志级别
 - 命令行参数优先级最高
 
@@ -46,19 +45,26 @@
 4. 配置文件
 5. Zod Schema 默认值
 
-### FR-CFG-006: API 密钥三级回退
+### FR-CFG-006: API 密钥回退链
 
 LLM-Router 自身 API 密钥的获取优先级：
 1. 命令行参数 `--llmrouter-api-key`
-2. 环境变量（由 `llmrouter_api_key_env` 指定，默认 `LLMROUTER_API_KEY`）
+2. 配置文件 `llmrouter_api_key` 字段（支持直接值或 `${env:VAR_NAME}` 语法）
 3. 自动生成 `rsk_` 前缀密钥（48 个随机字符）
 
 ### FR-CFG-007: 默认配置
 
 - 当配置文件不存在时使用硬编码默认配置
 - 默认监听端口: 11411
-- 默认 API 密钥环境变量名: `LLMROUTER_API_KEY`
+- 默认 API 密钥字段: `llmrouter_api_key`（空字符串）
 - 默认日志级别: `warn`
+
+### FR-CFG-008: 环境变量插值语法
+
+- 配置文件中字符串字段支持 `${env:VAR_NAME}` 语法，在运行时被替换为对应环境变量的值
+- 如果环境变量未定义，保留原始字符串不变
+- 此语法适用于所有字符串配置字段，包括 `llmrouter_api_key` 和后端 `api_key`
+- 不支持嵌套 `${env:${env:OTHER}}` 语法
 
 ## 关键函数
 

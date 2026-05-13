@@ -33,7 +33,7 @@
 
 - [ ] T001-05: 实现命令行参数解析
   - 输入: 001-config-module/spec.md FR-CFG-003
-  - 输出: 使用 commander 定义 --config, --port, --llmrouter-api-key, --llmrouter-api-key-env, --log-level 参数
+  - 输出: 使用 commander 定义 --config, --port, --llmrouter-api-key, --log-level 参数
   - 验收: 所有参数可解析，提供默认值
   - 文件: `src/config/index.ts`
 

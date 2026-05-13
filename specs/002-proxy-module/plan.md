@@ -38,10 +38,11 @@ function createBackendProxy(backend: BackendConfig, apiKey: string | null): Requ
 后端认证注入 (onProxyReq):
   │
   ├── require_api_key = true?
-  │     ├── key_env_var 有值?
-  │     │     ├── process.env[key_env_var] 有值 → 设置 Authorization: Bearer <key>
-  │     │     └── 为空且后端名含 "openai"? → 回退 OPENAI_API_KEY
-  │     └── key_env_var 为空? → 同上回退逻辑
+  │     ├── api_key 有值?
+  │     │     ├── 是 `${env:VAR_NAME}` 语法? → process.env[VAR_NAME] → 设置 Authorization: Bearer <key>
+  │     │     └── 是直接值? → 直接设置 Authorization: Bearer <key>
+  │     ├── api_key 为空且后端名含 "openai"? → 回退 OPENAI_API_KEY
+  │     └── 无法获取密钥? → 不设置认证头
   │
   └── require_api_key = false?
         └── 移除 Authorization 头

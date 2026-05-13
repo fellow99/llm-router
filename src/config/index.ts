@@ -7,7 +7,7 @@ import dotenv from 'dotenv';
 import { ConfigSchema, formatZodError } from '../types';
 import type { Config, RuntimeConfig } from '../types';
 import { createLogger } from '../logger';
-import { generateStrongAPIKey } from '../utils';
+import { generateStrongAPIKey, resolveEnvValue } from '../utils';
 import type { Logger } from 'winston';
 
 // ─── CLI Parsing ──────────────────────────────────────────────────────────────
@@ -16,7 +16,6 @@ interface CliOptions {
   config: string;
   port: number | undefined;
   llmrouterApiKey: string | undefined;
-  llmrouterApiKeyEnv: string | undefined;
   logLevel: string | undefined;
 }
 
@@ -26,7 +25,6 @@ function parseCommandLine(): CliOptions {
     .option('--config <path>', 'Config file path', 'config.json')
     .option('--port <number>', 'Listening port')
     .option('--llmrouter-api-key <key>', 'LLM Router API key')
-    .option('--llmrouter-api-key-env <name>', 'API key environment variable name')
     .option('--log-level <level>', 'Log level (debug/info/warn/error)');
 
   program.parse();
@@ -34,7 +32,6 @@ function parseCommandLine(): CliOptions {
     config?: string;
     port?: string;
     llmrouterApiKey?: string;
-    llmrouterApiKeyEnv?: string;
     logLevel?: string;
   }>();
 
@@ -42,7 +39,6 @@ function parseCommandLine(): CliOptions {
     config: opts.config || 'config.json',
     port: opts.port ? parseInt(opts.port, 10) : undefined,
     llmrouterApiKey: opts.llmrouterApiKey,
-    llmrouterApiKeyEnv: opts.llmrouterApiKeyEnv,
     logLevel: opts.logLevel,
   };
 }
@@ -85,10 +81,10 @@ function resolveApiKey(config: Config, cliKey?: string): { key: string; generate
     return { key: cliKey, generated: false };
   }
 
-  // Priority 2: Environment variable
-  const envKey = process.env[config.llmrouter_api_key_env];
-  if (envKey) {
-    return { key: envKey, generated: false };
+  // Priority 2: Config file (llmrouter_api_key — supports direct value or ${env:VAR})
+  const resolved = resolveEnvValue(config.llmrouter_api_key);
+  if (resolved) {
+    return { key: resolved, generated: false };
   }
 
   // Priority 3: Auto-generate
@@ -100,7 +96,7 @@ function resolveApiKey(config: Config, cliKey?: string): { key: string; generate
 
 const DEFAULT_CONFIG = {
   listening_port: 11411,
-  llmrouter_api_key_env: 'LLMROUTER_API_KEY',
+  llmrouter_api_key: '',
   aliases: {},
   backends: [
     {
@@ -143,11 +139,6 @@ export function loadConfig(): RuntimeConfig {
     logger.info('Listening port override applied', { port: cli.port });
   }
 
-  if (cli.llmrouterApiKeyEnv) {
-    config.llmrouter_api_key_env = cli.llmrouterApiKeyEnv;
-    logger.info('API key env var override applied', { env: cli.llmrouterApiKeyEnv });
-  }
-
   // 6. Resolve API key
   const { key, generated } = resolveApiKey(config, cli.llmrouterApiKey);
 
@@ -157,10 +148,11 @@ Your LLM-Router endpoint will be exposed publicly so that Cursor's servers can i
 A strong API key is highly recommended to prevent others from consuming your resources.
 
 You may specify the API key via:
-- Environment variable: export ${config.llmrouter_api_key_env}=your_api_key
+- Config file: set "llmrouter_api_key" in config.json (direct value)
+- Config file: set "llmrouter_api_key" to "\${env:YOUR_ENV_VAR}" to read from environment
 - Command line flag: --llmrouter-api-key=your_api_key
 
-Since neither of those have been set, we've generated a unique key for this session:
+Since none was provided, a random key has been generated for this session:
 ${key}
 
 This is what you should set as your API key in Cursor.

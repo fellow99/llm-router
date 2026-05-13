@@ -130,8 +130,8 @@ Authorization: Bearer <LLMROUTER_API_KEY>
 | 配置字段 | 说明 |
 |---------|------|
 | `require_api_key` | 后端是否需要认证 |
-| `key_env_var` | 密钥对应的环境变量名 |
-| 特殊回退 | OpenAI 后端在 `key_env_var` 为空时回退使用 `OPENAI_API_KEY` |
+| `api_key` | API 密钥值或 `${env:VAR_NAME}` 环境变量引用 |
+| 特殊回退 | OpenAI 后端在 `api_key` 为空时回退使用 `OPENAI_API_KEY` |
 
 **认证流程**:
 
@@ -139,12 +139,12 @@ Authorization: Bearer <LLMROUTER_API_KEY>
 后端认证流程 (Director):
   │
   ├── require_api_key = true?
-  │     ├── key_env_var 有值?
-  │     │     ├── 是环境变量名 (不含常见 API Key 前缀)?
-  │     │     │     └── process.env[key_env_var] → 设置 Authorization
+  │     ├── api_key 有值?
+  │     │     ├── 是 `${env:VAR_NAME}` 语法?
+  │     │     │     └── process.env[VAR_NAME] → 设置 Authorization
   │     │     └── 是直接密钥值?
   │     │           └── 直接设置 Authorization: Bearer <key>
-  │     ├── key_env_var 为空且名称含 "openai"?
+  │     ├── api_key 为空且名称含 "openai"?
   │     │     └── 回退 process.env.OPENAI_API_KEY → 设置 Authorization
   │     └── 无法获取密钥? → 不设置认证头
   │
@@ -163,7 +163,7 @@ Authorization: Bearer <LLMROUTER_API_KEY>
 ```json
 {
   "listening_port": 11411,
-  "llmrouter_api_key_env": "LLMROUTER_API_KEY",
+  "llmrouter_api_key": "",
   "aliases": {
     "o1": "groq/deepseek-r1-distill-qwen-32b",
     "deepseek-v4-pro": "deepseek/deepseek-v4-pro"
@@ -175,14 +175,14 @@ Authorization: Bearer <LLMROUTER_API_KEY>
       "prefix": "openai/",
       "default": true,
       "require_api_key": true,
-      "key_env_var": "OPENAI_API_KEY"
+      "api_key": "${env:OPENAI_API_KEY}"
     },
     {
       "name": "deepseek",
       "base_url": "https://api.deepseek.com",
       "prefix": "deepseek/",
       "require_api_key": true,
-      "key_env_var": "DEEPSEEK_API_KEY",
+      "api_key": "${env:DEEPSEEK_API_KEY}",
       "role_rewrites": { "developer": "system" },
       "unsupported_params": ["reasoning_effort"]
     }

@@ -138,8 +138,8 @@
 ```jsonc
 {
   "listening_port": 11411,         // 服务端口 (默认 11411)
-  "llmrouter_api_key_env": "LLMROUTER_API_KEY",
-                                    // API 密钥环境变量名
+  "llmrouter_api_key": "",
+                                    // API 密钥值或 "${env:VAR_NAME}" 环境变量引用
   "aliases": {                      // 模型别名映射（支持字符串和加权两种格式）
     // 字符串格式（向后兼容）
     "deepseek-v4-pro": "deepseek/deepseek-v4-pro",
@@ -160,7 +160,7 @@
       "prefix": "deepseek/",        // 模型前缀，用于路由
       "default": true,              // 默认后端 (仅一个为 true)
       "require_api_key": true,      // 是否需要注入 API Key
-      "key_env_var": "DEEPSEEK_API_KEY",  // API Key 环境变量名
+      "api_key": "${env:DEEPSEEK_API_KEY}",  // API Key (直接值或 ${env:} 引用)
       "role_rewrites": {            // 角色重写映射
         "developer": "system"
       },
@@ -186,7 +186,7 @@
 ### 认证优先级
 
 ```
-命令行 --llmrouter-api-key > 环境变量 LLMROUTER_API_KEY > 自动生成 rsk_***
+命令行 --llmrouter-api-key > 配置文件 llmrouter_api_key 字段 > 自动生成 rsk_***
 ```
 
 ## 快速开始
@@ -215,7 +215,7 @@ cp config.example.json config.json
       "prefix": "openai/",
       "default": true,
       "require_api_key": true,
-      "key_env_var": "OPENAI_API_KEY"
+      "api_key": "${env:OPENAI_API_KEY}"
     }
   ]
 }
@@ -285,7 +285,6 @@ curl -X POST http://localhost:11411/chat/completions \
 |------|--------|------|
 | `--config <path>` | `config.json` | 配置文件路径 (支持 .json/.yaml/.yml) |
 | `--port <number>` | 配置文件值 | 监听端口 |
-| `--llmrouter-api-key-env <name>` | `LLMROUTER_API_KEY` | API 密钥环境变量名 |
 | `--llmrouter-api-key <key>` | (无) | 直接指定 API 密钥 |
 | `--log-level <level>` | `warn` | 日志级别 (debug/info/warn/error) |
 

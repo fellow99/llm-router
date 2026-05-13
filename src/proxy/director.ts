@@ -1,6 +1,7 @@
 import type http from 'node:http';
 import type { Request, Response } from 'express';
 import type { BackendConfig } from '../types';
+import { resolveEnvValue } from '../utils';
 /**
  * Creates a proxy request callback that rewrites the request for the target backend.
  * - Sets X-Real-IP, X-Forwarded-For, X-Forwarded-Proto proxy headers
@@ -38,14 +39,14 @@ export function createDirector(
 }
 
 /**
- * Resolves the backend API key from environment variables.
+ * Resolves the backend API key from the `api_key` config field.
  *
  * Resolution order:
  * 1. If `require_api_key` is false → returns null
- * 2. Try `process.env[key_env_var]` as an environment variable name
+ * 2. Try resolving `backend.api_key`:
+ *    - "${env:VAR}" → reads process.env[VAR]
+ *    - non-empty other value → treated as a direct key value
  * 3. OpenAPI fallback: for backends with "openai" in name, try OPENAI_API_KEY
- * 4. If env var not found and key_env_var contains an API key value (starts with "sk-" or "rsk_"),
- *    use it directly — supports configs where the key is stored inline
  *
  * Returns null if no key is resolved.
  */
@@ -54,18 +55,9 @@ export function resolveBackendApiKey(backend: BackendConfig): string | null {
     return null;
   }
 
-  // Try the configured key_env_var as an environment variable name
-  if (backend.key_env_var) {
-    const key = process.env[backend.key_env_var];
-    if (key) return key;
+  const resolved = resolveEnvValue(backend.api_key);
+  if (resolved) return resolved;
 
-    // If the env var isn't found, treat key_env_var as the actual key value.
-    // This supports configs where the key is stored directly in the field
-    // (keys typically start with "sk-" for OpenAI/DeepSeek or "rsk_" for others).
-    return backend.key_env_var;
-  }
-
-  // Fallback: for OpenAI-named backends, try OPENAI_API_KEY
   if (backend.name.toLowerCase().includes('openai')) {
     const openaiKey = process.env['OPENAI_API_KEY'];
     if (openaiKey) return openaiKey;
