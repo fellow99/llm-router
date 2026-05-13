@@ -66,13 +66,25 @@ function weightedSelect(targets: Record<string, AliasTarget>): {
     return { selected: '', fallbacks: [] };
   }
 
-  const primary = active.filter(([, t]) => !t.fallback);
   const fallback = active
     .filter(([, t]) => t.fallback)
     .sort((a, b) => b[1].weight - a[1].weight)
     .map(([key]) => key);
 
-  // ... rest of existing logic unchanged
+  // Weighted random from ALL active targets (including fallback)
+  const totalWeight = active.reduce((sum, [, t]) => sum + t.weight, 0);
+  let random = Math.random() * totalWeight;
+
+  let selected = active[0][0];
+  for (const [key, target] of active) {
+    random -= target.weight;
+    if (random <= 0) {
+      selected = key;
+      break;
+    }
+  }
+
+  return { selected, fallbacks: fallback };
 }
 ```
 

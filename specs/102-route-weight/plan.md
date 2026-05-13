@@ -64,19 +64,14 @@ function weightedSelect(targets: Record<string, AliasTarget>): {
   selected: string;
   fallbacks: string[];
 } {
-  // 1. 分离非 fallback 和 fallback 目标
-  const primary = Object.entries(targets).filter(([_, t]) => !t.fallback);
+  // 1. 分离 fallback 目标（用于失败后的重试列表）
+  const primary = Object.entries(targets);  // 所有目标都参与加权选择
   const fallback = Object.entries(targets)
     .filter(([_, t]) => t.fallback)
     .sort((a, b) => b[1].weight - a[1].weight)  // 权重降序
     .map(([key]) => key);
 
-  if (primary.length === 0) {
-    // 全部都是 fallback（边缘情况）：返回第一个 fallback 作为主选
-    return { selected: fallback[0] || '', fallbacks: fallback.slice(1) };
-  }
-
-  // 2. 加权随机
+  // 2. 加权随机（从所有目标中选取）
   const totalWeight = primary.reduce((sum, [_, t]) => sum + t.weight, 0);
   let random = Math.random() * totalWeight;
 

@@ -27,12 +27,12 @@
   ```
 - 每个目标包含 `weight`（number，正数）和可选的 `fallback`（boolean，默认 false）
 - 权重归一化：总和不强制为 1.0，按比例分配
-- 加权随机选择从 **非 fallback** 的目标中选取
+- 加权随机选择从所有目标（包括 fallback）中选取
 
 ### FR-WGT-003: 回退路由 (Fallback)
 
-- `fallback: true` 的目标不参与正常的加权随机选择
-- 当加权选择的主后端请求失败（代理返回 502/连接错误）时，按权重降序依次尝试 fallback 目标
+- `fallback: true` 的目标也会参与正常加权选择，同时作为回退候选
+- 当加权选择的后端请求失败（代理返回 502/连接错误）时，按权重降序依次尝试 fallback 目标
 - 所有 fallback 都失败时，返回最终 502 错误
 
 ### FR-WGT-004: Zod Schema 验证
@@ -54,8 +54,7 @@
   │
   ▼
 applyAlias (加权选择)
-  ├── 非 fallback 目标: aliyun/glm5.1 (0.2), baidu/glm5.1 (0.4)
-  ├── fallback 目标: deepseek/glm5.1 (0.3)
+  ├── 所有目标: aliyun/glm5.1 (0.2), baidu/glm5.1 (0.4), deepseek/glm5.1 (0.3, fallback)
   ├── 加权随机 → 选中 baidu/glm5.1
   └── body.model = "baidu/glm5.1"
   │

@@ -35,7 +35,7 @@ T006 (功能测试验证)
 
 - [ ] **T002**: 实现 `weightedSelect` 函数并更新 `applyAlias`
   - 实现加权随机选择算法（归一化权重）
-  - 分离非 fallback 和 fallback 目标
+  - 标记 fallback 目标（用于失败后重试列表）
   - `applyAlias` 返回 `{ fallbackTargets: string[] }`
   - 保持旧字符串格式不变
   - 文件: `src/middleware/preprocessor.ts`
