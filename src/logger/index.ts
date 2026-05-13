@@ -20,7 +20,7 @@ export interface LoggerOptions {
  * Console transport uses colorize + simple format for readability.
  */
 export function createLogger(options: LoggerOptions = {}): winston.Logger {
-  const level = options.level || process.env.LOG_LEVEL || 'warn';
+  const level = options.level || process.env.LOG_LEVEL || 'info';
 
   return winston.createLogger({
     level,
