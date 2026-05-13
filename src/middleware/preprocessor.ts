@@ -2,27 +2,46 @@ import type { BackendConfig, ChatCompletionRequest, AliasTarget, AliasValue } fr
 
 // ─── Weighted Random Selection ──────────────────────────────────────────────
 
-function weightedSelect(targets: Record<string, AliasTarget>): {
+function weightedSelect(
+  targets: Record<string, AliasTarget>,
+  activePrefixes: Set<string>,
+): {
   selected: string;
   fallbacks: string[];
 } {
-  const active = Object.entries(targets).filter(([, t]) => !t.disabled);
+  function hasActiveBackend(targetKey: string): boolean {
+    for (const prefix of activePrefixes) {
+      if (targetKey.startsWith(prefix)) return true;
+    }
+    return false;
+  }
 
-  if (active.length === 0) {
+  const active = Object.entries(targets).filter(
+    ([key, t]) => !t.disabled && hasActiveBackend(key),
+  );
+
+  // Recover: if all targets are on disabled backends, try fallback-labeled ones
+  // against active backends even if they were filtered above
+  const resolveActive = active.length > 0
+    ? active
+    : Object.entries(targets).filter(
+        ([key, t]) => t.fallback && hasActiveBackend(key),
+      );
+
+  if (resolveActive.length === 0) {
     return { selected: '', fallbacks: [] };
   }
 
-  const fallback = active
+  const fallback = resolveActive
     .filter(([, t]) => t.fallback)
     .sort((a, b) => b[1].weight - a[1].weight)
     .map(([key]) => key);
 
-  // Weighted random from ALL active targets (including fallback=true)
-  const totalWeight = active.reduce((sum, [, t]) => sum + t.weight, 0);
+  const totalWeight = resolveActive.reduce((sum, [, t]) => sum + t.weight, 0);
   let random = Math.random() * totalWeight;
 
-  let selected = active[0][0];
-  for (const [key, target] of active) {
+  let selected = resolveActive[0][0];
+  for (const [key, target] of resolveActive) {
     random -= target.weight;
     if (random <= 0) {
       selected = key;
@@ -38,6 +57,7 @@ function weightedSelect(targets: Record<string, AliasTarget>): {
 export function applyAlias(
   body: ChatCompletionRequest,
   aliases: Record<string, AliasValue>,
+  backends: BackendConfig[],
 ): { fallbackTargets: string[] } {
   if (!body.model || !aliases[body.model]) {
     return { fallbackTargets: [] };
@@ -50,7 +70,11 @@ export function applyAlias(
     return { fallbackTargets: [] };
   }
 
-  const { selected, fallbacks } = weightedSelect(aliasValue);
+  const activePrefixes = new Set(
+    backends.filter(b => !b.disabled).map(b => b.prefix),
+  );
+
+  const { selected, fallbacks } = weightedSelect(aliasValue, activePrefixes);
   body.model = selected;
   return { fallbackTargets: fallbacks };
 }

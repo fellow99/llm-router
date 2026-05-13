@@ -108,13 +108,34 @@ export function chatCompletionsHandler(
       stream: body.stream || false,
     });
 
-    const { fallbackTargets } = applyAlias(body, config.aliases);
+    const { fallbackTargets } = applyAlias(body, config.aliases, config.backends);
 
     const match = matchBackend(body.model, config.backends);
 
     if (!match) {
+      for (const fbTarget of fallbackTargets) {
+        const fbMatch = matchBackend(fbTarget, config.backends);
+        if (fbMatch) {
+          config.logger.warn('Alias target backend unavailable, using fallback', {
+            original: body.model,
+            fallback: fbMatch.backend.name,
+            model: fbMatch.modelWithoutPrefix,
+          });
+
+          body.model = fbMatch.modelWithoutPrefix;
+          applyRoleRewrites(body, fbMatch.backend.role_rewrites);
+          filterUnsupportedParams(body, fbMatch.backend.unsupported_params);
+          req.body = body;
+
+          routeToBackend(req, res, next, proxies, fbMatch, fallbackTargets.slice(1), config);
+          return;
+        }
+      }
+
       if (proxies.defaultProxy) {
-        config.logger.info('Using default proxy', { model: body.model });
+        config.logger.warn('No matching backend, using default proxy', {
+          model: body.model,
+        });
         return proxies.defaultProxy(req, res, next);
       }
 
