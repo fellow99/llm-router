@@ -299,6 +299,64 @@ curl -X POST http://localhost:11411/chat/completions \
 | `-k, --api-key <key>` | (无) | 直接指定 API 密钥 |
 | `--log-level <level>` | `warn` | 日志级别 (debug/info/warn/error) |
 
+## 部署到 Docker
+
+镜像已发布到 Docker Hub：[`fellow99/llm-router`](https://hub.docker.com/r/fellow99/llm-router)
+
+部署前需准备配置文件 `config.json`（参考 [配置说明](#2-配置文件)），至少需配置 `backends` 和 `api_key`。
+
+### 方式一：docker run
+
+```bash
+docker pull fellow99/llm-router:latest
+
+docker run -d \
+  --name llm-router \
+  -p 11411:11411 \
+  -v /path/to/config.json:/data/config.json \
+  --restart unless-stopped \
+  fellow99/llm-router:latest
+```
+
+| 参数 | 说明 |
+|------|------|
+| `-p 11411:11411` | 将容器 11411 端口映射到宿主机 |
+| `-v /path/to/config.json:/data/config.json` | 挂载配置文件（将 `/path/to/` 替换为实际路径） |
+| `--restart unless-stopped` | 容器异常退出或宿主机重启后自动恢复 |
+
+### 方式二：docker-compose
+
+创建 `docker-compose.yml`：
+
+```yaml
+version: "3.8"
+
+services:
+  llm-router:
+    image: fellow99/llm-router:latest
+    ports:
+      - "11411:11411"
+    volumes:
+      - ./config.json:/data/config.json
+    restart: unless-stopped
+```
+
+启动：
+
+```bash
+docker-compose up -d
+```
+
+### 自行构建
+
+如需从源码构建镜像，可使用项目自带的构建脚本：
+
+```bash
+./docker/build.sh
+```
+
+该脚本自动读取 `package.json` 中的版本号作为镜像标签，并询问是否推送到 Docker Hub。
+
 ## 项目结构
 
 ```
