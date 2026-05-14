@@ -11,13 +11,13 @@
 		"deepseek-v4-flash": {
 			"deepseek/deepseek-v4-flash": { "weight": 1, "fallback": true }
 		},
-		"glm5.1": {
-			"opencode-go/glm5.1": { "weight": 0.5 },
-			"baidu/glm5.1": { "weight": 0.5, "fallback": true }
+		"glm-5.1": {
+			"opencode-go/glm-5.1": { "weight": 0.5 },
+			"baidu/glm-5.1": { "weight": 0.5, "fallback": true }
 		},
 		"qwen3.6-plus": {
 			"opencode-go/qwen3.6-plus": { "weight": 0.5 },
-			"aliyun-coding-plan/qwen3.6-plus": { "weight": 0.5, "fallback": true }
+			"aliyun/qwen3.6-plus": { "weight": 0.5, "fallback": true }
 		}
 	},
 	"backends": [
@@ -30,12 +30,18 @@
 			"api_key": "${env:DEEPSEEK_API_KEY}"
 		},
 		{
-			"name": "openrouter",
-			"base_url": "https://openrouter.ai/api/v1",
-			"prefix": "openrouter/",
-			"disabled": true,
+			"name": "aliyun",
+			"base_url": "https://coding.dashscope.aliyuncs.com/v1",
+			"prefix": "aliyun/",
 			"require_api_key": true,
-			"api_key": "${env:OPENROUTER_API_KEY}"
+			"api_key": "${env:ALIYUN_CODINGPLAN_API_KEY}"
+		},
+		{
+			"name": "baidu",
+			"base_url": "https://qianfan.baidubce.com/v2/coding",
+			"prefix": "baidu/",
+			"require_api_key": true,
+			"api_key": "${env:BAIDU_CODINGPLAN_API_KEY}"
 		},
 		{
 			"name": "opencode-go",
@@ -44,29 +50,6 @@
 			"disabled": true,
 			"require_api_key": true,
 			"api_key": "${env:OPENCODE_API_KEY}"
-		},
-		{
-			"name": "aliyun-coding-plan",
-			"base_url": "https://coding.dashscope.aliyuncs.com/v1",
-			"prefix": "aliyun-coding-plan/",
-			"disabled": true,
-			"require_api_key": true,
-			"api_key": "${env:OPENCODE_API_KEY}"
-		},
-		{
-			"name": "aliyun-token-plan",
-			"base_url": "https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1",
-			"prefix": "aliyun-token-plan/",
-			"disabled": true,
-			"require_api_key": true,
-			"api_key": "${env:OPENCODE_API_KEY}"
-		},
-		{
-			"name": "baidu",
-			"base_url": "https://qianfan.baidubce.com/v2/coding",
-			"prefix": "baidu/",
-			"require_api_key": true,
-			"api_key": "${env:BAIDU_CODINGPLAN_API_KEY}"
 		}
 	]
 }
