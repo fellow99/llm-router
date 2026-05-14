@@ -1,6 +1,6 @@
 # llm-router
 
-大模型聚合路由服务 —— 南向聚合连接多个大模型 API，北向提供兼容 OpenAI 接口的统一服务端点。解决 Cursor 等 IDE 无法同时配置多个 LLM 提供商的限制。
+大模型聚合路由服务 —— 南向聚合连接多个大模型 API，北向提供兼容 OpenAI 接口的统一服务端点。解决各类 AI 工具/IDE 无法同时配置多个 LLM 提供商的限制。
 
 参考工程：[kcolemangt/llm-router](https://github.com/kcolemangt/llm-router.git)
 
@@ -24,7 +24,7 @@
 
 ```
 ┌────────────────────────────────────────────────────┐
-│              客户端 (Cursor / ChatBox 等)            │
+│              客户端 (各类 AI 工具 / ChatBox 等)            │
 │  OpenAI Base URL → http://localhost:11411/          │
 │  OpenAI API Key → LLM-Router API Key                │
 └────────────────────────┬───────────────────────────┘
@@ -274,16 +274,16 @@ curl -X POST http://localhost:11411/chat/completions \
   -d '{"model":"o1","messages":[{"role":"user","content":"Hello"}]}'
 ```
 
-### 6. 在 Cursor 中配置
+### 6. 在各类 AI 工具中配置
 
 | 设置项 | 值 |
 |--------|-----|
 | OpenAI Base URL | `http://<your-host>:11411/` |
 | OpenAI API Key | `LLMROUTER_API_KEY` 的值 |
 
-然后在 Cursor 中使用带前缀的模型名替代普通模型名：
+然后在 AI 工具中使用带前缀的模型名替代普通模型名：
 
-| 普通模型名 | Cursor 中使用的模型名 |
+| 普通模型名 | AI 工具中使用的模型名 |
 |-----------|---------------------|
 | `gpt-4o-mini` | `openai/gpt-4o-mini` |
 | `deepseek-chat` | `deepseek/deepseek-chat` |

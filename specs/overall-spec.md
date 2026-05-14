@@ -5,7 +5,7 @@
 
 ## 1. 概述
 
-**LLM-Router** 是一个基于 TypeScript/Express 的反向代理服务器，用于将 OpenAI 兼容的 `chat/completions` API 请求根据模型前缀路由到不同的 LLM 后端（OpenAI、Groq、Ollama、DeepSeek 等）。它解决了 Cursor 等 IDE 无法同时配置多个 LLM 提供商的限制。
+**LLM-Router** 是一个基于 TypeScript/Express 的反向代理服务器，用于将 OpenAI 兼容的 `chat/completions` API 请求根据模型前缀路由到不同的 LLM 后端（OpenAI、Groq、Ollama、DeepSeek 等）。它解决了各类 AI 工具/IDE 无法同时配置多个 LLM 提供商的限制。
 
 本项目是 Go 版本 llm-router 的 TypeScript 重写，保持功能对等，利用 Node.js/Express 生态提供更灵活的部署方式。
 
@@ -152,7 +152,7 @@
 
 - 必须兼容 OpenAI Chat Completions API 协议
 - 支持流式 (SSE) 和非流式响应
-- 支持 Cursor 等 IDE 的 API 调用模式
+- 支持各类 AI 工具/IDE 的 API 调用模式
 
 ### NFR-06: 类型安全
 

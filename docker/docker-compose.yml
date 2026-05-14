@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   llm-router:
-    image: fellow99/llm-router:0.4.3
+    image: fellow99/llm-router:latest
     build:
       context: ..
       dockerfile: docker/Dockerfile

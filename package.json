@@ -1,6 +1,6 @@
 {
   "name": "llm-router",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "description": "大模型聚合路由服务 —— 南向聚合连接多个大模型 API，北向提供兼容 OpenAI 接口的统一服务端点。",
   "main": "dist/app.js",
   "scripts": {

@@ -277,7 +277,7 @@ export function loadConfig(): RuntimeConfig {
 
   if (generated) {
     console.log(`
-Your LLM-Router endpoint will be exposed publicly so that Cursor's servers can invoke it.
+Your LLM-Router endpoint will be exposed publicly so that AI tools' servers can invoke it.
 A strong API key is highly recommended to prevent others from consuming your resources.
 
 You may specify the API key via:
@@ -288,7 +288,7 @@ You may specify the API key via:
 Since none was provided, a random key has been generated for this session:
 ${key}
 
-This is what you should set as your API key in Cursor.
+This is what you should set as your API key in your AI tool.
 `);
   }
 
