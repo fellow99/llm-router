@@ -4,6 +4,7 @@ import type { ProxyInstances } from '../proxy';
 import { corsMiddleware } from '../middleware/cors';
 import { authMiddleware } from '../middleware/auth';
 import { chatCompletionsHandler } from '../handler/chatHandler';
+import { modelsHandler } from '../handler/modelsHandler';
 
 export function createRouter(config: RuntimeConfig, proxies: ProxyInstances): Router {
   const router = Router();
@@ -22,6 +23,9 @@ export function createRouter(config: RuntimeConfig, proxies: ProxyInstances): Ro
 
   router.post('/chat/completions', chatCompletionsHandler(config, proxies));
   router.post('/v1/chat/completions', chatCompletionsHandler(config, proxies));
+
+  router.get('/models', modelsHandler(config));
+  router.get('/v1/models', modelsHandler(config));
 
   router.all('*', (req, res, next) => {
     if (proxies.defaultProxy) {
