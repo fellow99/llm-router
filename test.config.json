@@ -1,0 +1,72 @@
+{
+	"server": {
+		"host": "${env:LLMROUTER_SERVER_HOST}",
+		"port": "${env:LLMROUTER_SERVER_PORT}",
+		"api_key": "${env:LLMROUTER_API_KEY}"
+	},
+	"aliases": {
+		"deepseek-v4-pro": {
+			"deepseek/deepseek-v4-pro": { "weight": 1, "fallback": true }
+		},
+		"deepseek-v4-flash": {
+			"deepseek/deepseek-v4-flash": { "weight": 1, "fallback": true }
+		},
+		"glm5.1": {
+			"opencode-go/glm5.1": { "weight": 0.5 },
+			"baidu/glm5.1": { "weight": 0.5, "fallback": true }
+		},
+		"qwen3.6-plus": {
+			"opencode-go/qwen3.6-plus": { "weight": 0.5 },
+			"aliyun-coding-plan/qwen3.6-plus": { "weight": 0.5, "fallback": true }
+		}
+	},
+	"backends": [
+		{
+			"name": "deepseek",
+			"base_url": "https://api.deepseek.com",
+			"prefix": "deepseek/",
+			"default": true,
+			"require_api_key": true,
+			"api_key": "${env:DEEPSEEK_API_KEY}"
+		},
+		{
+			"name": "openrouter",
+			"base_url": "https://openrouter.ai/api/v1",
+			"prefix": "openrouter/",
+			"disabled": true,
+			"require_api_key": true,
+			"api_key": "${env:OPENROUTER_API_KEY}"
+		},
+		{
+			"name": "opencode-go",
+			"base_url": "https://opencode.ai/zen/go/v1",
+			"prefix": "opencode-go/",
+			"disabled": true,
+			"require_api_key": true,
+			"api_key": "${env:OPENCODE_API_KEY}"
+		},
+		{
+			"name": "aliyun-coding-plan",
+			"base_url": "https://coding.dashscope.aliyuncs.com/v1",
+			"prefix": "aliyun-coding-plan/",
+			"disabled": true,
+			"require_api_key": true,
+			"api_key": "${env:OPENCODE_API_KEY}"
+		},
+		{
+			"name": "aliyun-token-plan",
+			"base_url": "https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1",
+			"prefix": "aliyun-token-plan/",
+			"disabled": true,
+			"require_api_key": true,
+			"api_key": "${env:OPENCODE_API_KEY}"
+		},
+		{
+			"name": "baidu",
+			"base_url": "https://qianfan.baidubce.com/v2/coding",
+			"prefix": "baidu/",
+			"require_api_key": true,
+			"api_key": "${env:BAIDU_CODINGPLAN_API_KEY}"
+		}
+	]
+}

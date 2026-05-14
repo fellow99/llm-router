@@ -142,6 +142,3 @@ vite.config.ts.timestamp-*
 # Editors or Tools
 .opencode/
 .sisyphus/
-
-# Others
-/test.config.json
